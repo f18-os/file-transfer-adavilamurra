@@ -4,7 +4,7 @@ import sys
 class Client:
     def __init__(self, file_name, choice):
         self.sAddr = ("127.0.0.1", 50000)                #set address and reserve port
-        self.file_name, self.choice = "", ""
+        self.file_name, self.choice = file_name, choice
         self.clientSock = socket(AF_INET, SOCK_STREAM)      #create client socket
         try:
             self.clientSock.connect(self.sAddr)          #connect to Server
@@ -20,18 +20,18 @@ class Client:
     def getFileFromServer(self):
         with open(self.file_name, "w") as clientFile:
             while True:
-                print("Receiving data...")
+                #print("Receiving data...")
                 data = self.clientSock.recv(1024).decode()
                 if data == "File not found. Try again.":
                     print(data)
                     return
                 if not data:
                     break
-                print("data =", data)
+                print("Data Received = ", data)
                 # write data to a file
                 clientFile.write(data)    
         clientFile.close()
-        print("Successfully get file from server.")
+        print("Successfully got file from server.")
 
     #put method
     def sendFileToServer(self):
@@ -60,9 +60,10 @@ class Client:
             basicInfo = self.file_name + ":" + self.choice
             #send file name and choice and if the ack is not received, send again
             print(basicInfo)
+            #print("Sending basic info to server...")
             self.clientSock.send(basicInfo.encode())     #send file name and choice to server
             ack = self.clientSock.recv(4).decode()
-            print(ack)
+            #print("ACK= ", ack)
             if ack == "Done":
                 return
     

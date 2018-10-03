@@ -5,20 +5,20 @@ class Server:
     def __init__(self):
         self.listenerSocket = self.socketListen()  #create listen socket
         self.connSocket, self.addr = None, ""
-        self.file_name, self.choice, self.restOfBuffer = "", "", ""
+        self.file_name, self.choice, self.strBuffer = "", "", ""
         self.serverAddr = ("", 0)
         self.acceptConnection()     #accept connection from client
     
     #put method from client   
     def getFileFromClient(self):
-        if self.restOfBuffer == "File not found. Try again.":
+        if self.strBuffer == "File not found. Try again.":
             return
         with open(self.file_name, "w") as serverFile:
-            serverFile.write(self.restOfBuffer)
+            serverFile.write(self.strBuffer)
             while True:
-                print("Receiving data...")
+                #print("Receiving data...")
                 data = self.connSocket.recv(1024).decode()
-                if self.restOfBuffer == "File not found. Try again." or data == "File not found. Try again.":
+                if self.strBuffer == "File not found. Try again." or data == "File not found. Try again.":
                     return
                 if not data:
                     break
@@ -26,7 +26,7 @@ class Server:
                 # write data to a file
                 serverFile.write(data)    
         serverFile.close()
-        print("Successfully get file from client.")
+        print("Successfully got file from client.")
         return
 
     #get method from client
@@ -51,27 +51,28 @@ class Server:
         elif(self.choice.lower() == "get"):
             self.sendFileToClient()
         else:
-            print("Invalid choice.")
+            print("Invalid choice. Choices: PUT or GET.")
         return
 
     def getNameAndChoice(self):
         while True:
-            print("Getting name and choice...")
-            nameChoice = self.connSocket.recv(300).decode().split(":")
-            print("Name:choice= ", nameChoice)
-            self.file_name = nameChoice[0][1:]
-            print("File: ", self.file_name)
+            #print("Getting name and choice...")
+            nameChoice = self.connSocket.recv(1024).decode().split(":")
+            #print("Name:choice= ", nameChoice)
+            self.file_name = nameChoice[0]
+            #print("File: ", self.file_name)
             try:
                 if(len(nameChoice[1]) > 3):
                     self.choice = nameChoice[1][:3]
-                    self.restOfBuffer = nameChoice[1][3:]
+                    self.strBuffer = nameChoice[1][3:]
                 else:
                     self.choice = nameChoice[1]
-                    self.restOfBuffer = ""
+                    self.strBuffer = ""
                 if (self.choice.lower()) == "put" or (self.choice.lower()) == "get":
                     self.connSocket.send("Done".encode())
-                    print("Choice: ", self.choice)
-                    print("Buff: ", self.restOfBuffer)
+                    #print("Choice: ", self.choice)
+                    #print("Buff: ", self.strBuffer)
+                return
             except:
                 print("Error. Data did not arrive correctly.")
                 self.connSocket.send("Error".encode())
