@@ -3,14 +3,11 @@ import sys
 
 class Server:
     def __init__(self):
-        self.listenerSocket = listenerSocket = self.socketListen()  # create listen socket
-        self.connSocket, self.addr = connSocket, addr = None, ""
-        self.file_name, self.restOfBuffer = file_name, restOfBuffer = "", ""
-        self.serverAddr = serverAddr = ("", 0)
+        self.listenerSocket = self.socketListen()  # create listen socket
+        self.connSocket, self.addr = None, ""
+        self.file_name, self.restOfBuffer = "", ""
+        self.serverAddr = ("", 0)
         self.acceptConnection()     # accept connection from client
-        self.getFileName()
-        self.getFileFromClient()
-        self.closeConnection()
 
     #put method from client   
     def getFileFromClient(self):
@@ -23,22 +20,25 @@ class Server:
                 data = self.connSocket.recv(100).decode()
                 if self.restOfBuffer == "File not found. Try again." or data == "File not found. Try again.":
                     return
-                if not data:
+                if not data or data == "":
                     break
                 print("Data Received = ", data)
                 # write data to a file
                 serverFile.write(data)    
         serverFile.close()
-        print("Successfully get file from client.")
+        print("Successfully got file from client.")
     
     def getFileName(self):
         while True:
+            print("Receiving file name...")
             name = self.connSocket.recv(255).decode().split()
             self.file_name = name[0]
+            print("File name: ", self.file_name)
             try:
                 if(len(name) > 1):
                     self.restOfBuffer = ''.join(name[1:])
                 self.connSocket.send("Done".encode())
+                print("Ack sent. File name received correctly")
                 break
             except:
                 print("Error. Data did not arrive correctly")
@@ -63,13 +63,11 @@ class Server:
         self.listenerSocket.close()
         self.connSocket.close()
         print("---- Connection closed. ---- \n")
-        return
 
 def startServer():
     server = Server()
-    #server.acceptConnection()
-    #server.getFileName()
-    #server.getFileFromClient()
-    #server.closeConnection()
+    server.getFileName()
+    server.getFileFromClient()
+    server.closeConnection()
 
 startServer()

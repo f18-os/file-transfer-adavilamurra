@@ -5,7 +5,7 @@ class Client:
     def __init__(self, file_name):
         self.sAddr = ("127.0.0.1", 50000)                # set address and reserve port
         self.file_name = file_name
-        self.clientSock = clientSock = socket(AF_INET, SOCK_STREAM)      # create client socket
+        self.clientSock = socket(AF_INET, SOCK_STREAM)      # create client socket
         try:
             self.clientSock.connect(self.sAddr)          # connect to Server
             print("Connected to server.")
@@ -16,13 +16,12 @@ class Client:
         self.sendFileToServer()             # send file from client to server
         self.closeConnection()              # close socket connection
 
-    #put method
     def sendFileToServer(self):
         try:
             with open(self.file_name, "r") as clientFile:
-                print("Sending file...")
+                print("Sending file... ", self.file_name)
                 data = clientFile.read()
-                print(data)
+                print("Data: ", data)
                 self.clientSock.send(data.encode())
                 clientFile.close()
         except IOError as e:
@@ -33,9 +32,11 @@ class Client:
     
     def sendFileNameToServer(self):
         while True:
+            print("Sending file name...")
             # send file name and if the ack is not received, send again
-            self.clientSock.send((self.file_name).encode())
+            self.clientSock.send(self.file_name.encode())
             ack = self.clientSock.recv(4).decode()
+            print("Ack: ", ack)
             if ack == "Done":
                 print("File Name sent.")
                 break
