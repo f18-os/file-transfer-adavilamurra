@@ -2,26 +2,43 @@ from socket import *
 import sys
 
 class Client:
-    def __init__(self, file_name):
-        self.sAddr = ("127.0.0.1", 50000)                # set address and reserve port
-        self.file_name = file_name
-        self.clientSock = socket(AF_INET, SOCK_STREAM)      # create client socket
+    def __init__(self, file_name, choice):
+        self.sAddr = ("127.0.0.1", 50000)                #set address and reserve port
+        self.file_name, self.choice = "", ""
+        self.clientSock = socket(AF_INET, SOCK_STREAM)      #create client socket
         try:
-            self.clientSock.connect(self.sAddr)          # connect to Server
+            self.clientSock.connect(self.sAddr)          #connect to Server
             print("Connected to server.")
         except error:
             print("Error. Server not found.")
             sys.exit()
-        self.sendFileNameToServer()         # send file name
-        self.sendFileToServer()             # send file from client to server
-        self.closeConnection()              # close socket connection
+        self.sendBasicInfoToServer()        #send file name and choice to server
+        self.determineChoice()              #determine if put or get
+        self.closeConnection()              #close socket connection
 
+    #get method                  
+    def getFileFromServer(self):
+        with open(self.file_name, "w") as clientFile:
+            while True:
+                print("Receiving data...")
+                data = self.clientSock.recv(1024).decode()
+                if data == "File not found. Try again.":
+                    print(data)
+                    return
+                if not data:
+                    break
+                print("data =", data)
+                # write data to a file
+                clientFile.write(data)    
+        clientFile.close()
+        print("Successfully get file from server.")
+
+    #put method
     def sendFileToServer(self):
         try:
             with open(self.file_name, "r") as clientFile:
-                print("Sending file... ", self.file_name)
+                print("Sending file...")
                 data = clientFile.read()
-                print("Data: ", data)
                 self.clientSock.send(data.encode())
                 clientFile.close()
         except IOError as e:
@@ -29,17 +46,25 @@ class Client:
             self.clientSock.send("File not found. Try again.".encode)
             return
         print("Successfuly sent file to server.")
+
+    def determineChoice(self):
+        if(self.choice.lower() == "put"):
+            self.sendFileToServer()
+        elif(self.choice.lower() == "get"):
+            self.getFileFromServer()
+        else:
+            print("Invalid choice. Choices: PUT or GET.")
     
-    def sendFileNameToServer(self):
+    def sendBasicInfoToServer(self):
         while True:
-            print("Sending file name...")
-            # send file name and if the ack is not received, send again
-            self.clientSock.send(self.file_name.encode())
+            basicInfo = self.file_name + ":" + self.choice
+            #send file name and choice and if the ack is not received, send again
+            print(basicInfo)
+            self.clientSock.send(basicInfo.encode())     #send file name and choice to server
             ack = self.clientSock.recv(4).decode()
-            print("Ack: ", ack)
+            print(ack)
             if ack == "Done":
-                print("File Name sent.")
-                break
+                return
     
     def closeConnection(self):
         self.clientSock.close()
@@ -47,8 +72,7 @@ class Client:
 
 def startClient():
     file_name = input('Enter file name: ')
-    client = Client(file_name)
-    #client.sendFileNameToServer()
-    #client.sendFileToServer()
+    choice = input('Enter choice (PUT or GET): ')
+    client = Client(file_name, choice)
         
 startClient()
