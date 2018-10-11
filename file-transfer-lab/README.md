@@ -1,6 +1,6 @@
 # TCP File Transfer Protocol
 
-I created a transfer protocol to send files using TCP. It is single threaded and the server accepts multi clients.
+I created a transfer protocol to send files using TCP. It is multithreaded and the server accepts multi clients.
 
 ## Getting Started
 
@@ -29,5 +29,4 @@ README.md      % more info about the protocol (This file)
 ```
 
 #### Disclaimer
-I am not a graduate student. I added the GET as a challenge. I does not work
-100% of the times, but it is close to that. 
+I am not a graduate student. I added the GET as a challenge. The GET only works on the last client (it hangs with other clients)
