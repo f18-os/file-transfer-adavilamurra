@@ -4,7 +4,7 @@ Last modification date: 10/7/18
 ## How to run the program:
     "python3 server.py"
 ### Additional notes on how to run program:
-    This program does not take in any parameters. So the only way to start the client is by running the command above.
+    This program does not take in any parameters. So the only way to start the server is by running the command above.
 
 ## Background:
  This program is the server portion of a File Transfer Protocol. There is a client program that interacts with the server program to make the File transfer protocol possible. The client side will send a request to either retrieve a File(GET) or to save a file(PUT/SEND) to the server.
@@ -38,9 +38,10 @@ Last modification date: 10/7/18
         * If an error message is found, then the file was not found and the connection must be closed.
         * Print every message received.
         * Print a success message is the entire file was received correctly.
+	* For now, the GET works only with the last client.
         
     The server allows connection for multiple clients, so after connecting
     with the first client, it will start looking to accept connections. The
     first client will let the server know how many other clients there are,
     and the server will look to make that many connections.
-    The way the server does this is by using forking. 
+    The way the server does this is by using multithreading. 
