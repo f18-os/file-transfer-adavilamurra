@@ -1,5 +1,5 @@
 from socket import *
-import sys, os
+import sys, os, threading
 
 class Server:
     def __init__(self):
@@ -69,7 +69,7 @@ class Server:
                 else:
                     self.choice = nameChoice[1]
                     self.restOfBuffer = ""
-                if self.choice.lower() == "put" or self.choice.lower() == "get":
+                if self.choice.lower() == "get" or self.choice.lower() == "put":
                     self.connSocket.send("Done".encode()) 
                 return
             except:
@@ -90,6 +90,7 @@ class Server:
             os.wait()
         
     def connectToClients(self):
+        threads = []
         # check for connections depending on the number of clients
         if self.numClients < 1:
             print("You need at least one client.")
@@ -99,8 +100,14 @@ class Server:
             self.determineChoice()
         else:
             for client in range(self.numClients):
-                self.forkClient(client)
-    
+                threads.append(self.newClientThread(client))
+
+    def newClientThread(self, client):
+        if client > 0:
+            self.acceptConnection()
+        self.getNameAndChoice()
+        self.determineChoice()
+                
     def getNumberOfClients(self):
         self.numClients = int(self.connSocket.recv(1).decode())
 
